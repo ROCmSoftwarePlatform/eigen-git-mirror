@@ -47,7 +47,7 @@ set(EIGEN_TEST_MATRIX_DIR "" CACHE STRING "Enable testing of realword sparse mat
 if(EIGEN_TEST_MATRIX_DIR)
   if(NOT WIN32)
     message(STATUS "Test realworld sparse matrices: ${EIGEN_TEST_MATRIX_DIR}")
-    add_definitions( -DTEST_REAL_CASES="${EIGEN_TEST_MATRIX_DIR}" )
+    add_definitions( -DTEST_REAL_CASES=${EIGEN_TEST_MATRIX_DIR} )
   else(NOT WIN32)
     message(STATUS "REAL CASES CAN NOT BE CURRENTLY TESTED ON WIN32")
   endif(NOT WIN32)
@@ -100,7 +100,7 @@ else()
 endif()
 
 
-find_package(PASTIX QUIET COMPONENTS METIS SCOTCH)
+find_package(PASTIX QUIET COMPONENTS METIS SEQ)
 # check that the PASTIX found is a version without MPI
 find_path(PASTIX_pastix_nompi.h_INCLUDE_DIRS
   NAMES pastix_nompi.h
@@ -405,6 +405,48 @@ if(CUDA_FOUND)
 endif(CUDA_FOUND)
 
 endif(EIGEN_TEST_CUDA)
+
+
+# HIP unit tests
+option(EIGEN_TEST_HIP "Add HIP support." OFF)
+if (EIGEN_TEST_HIP)
+
+  set(HIP_PATH "/opt/rocm/hip" CACHE STRING "Path to the HIP installation.")
+
+  if (EXISTS ${HIP_PATH})
+    
+    list(APPEND CMAKE_MODULE_PATH ${HIP_PATH}/cmake) 
+
+    find_package(HIP REQUIRED)
+    if (HIP_FOUND)
+
+      execute_process(COMMAND ${HIP_PATH}/bin/hipconfig --platform OUTPUT_VARIABLE HIP_PLATFORM)
+
+      if (${HIP_PLATFORM} STREQUAL "hcc")
+
+	include_directories(${CMAKE_CURRENT_BINARY_DIR})
+	include_directories(${HIP_PATH}/include)
+
+	set(EIGEN_ADD_TEST_FILENAME_EXTENSION  "cu")
+	ei_add_test(hip_basic)
+	unset(EIGEN_ADD_TEST_FILENAME_EXTENSION)
+	
+      elseif (${HIP_PLATFORM} STREQUAL "nvcc")
+	message(FATAL_ERROR "HIP_PLATFORM = nvcc is not supported within Eigen")
+      else ()
+	message(FATAL_ERROR "Unknown HIP_PLATFORM = ${HIP_PLATFORM}")
+      endif()
+      
+    endif(HIP_FOUND)
+    
+  else ()
+
+    message(FATAL_ERROR "EIGEN_TEST_HIP is ON, but the specified HIP_PATH (${HIP_PATH}) does not exist")
+    
+  endif()
+    
+endif(EIGEN_TEST_HIP)
+
 
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/failtests)    
