@@ -15,15 +15,13 @@
 
 #define EIGEN_TEST_NO_LONGDOUBLE
 #define EIGEN_TEST_NO_COMPLEX
-#define EIGEN_TEST_FUNC hip_basic
+#define EIGEN_TEST_FUNC gpu_basic
 #define EIGEN_DEFAULT_DENSE_INDEX_TYPE int
 
-#include <hip/hip_runtime.h>
-
 #include "main.h"
-#include "hip_common.h"
+#include "gpu_common.h"
 
-// Check that dense modules can be properly parsed by hipcc
+// Check that dense modules can be properly parsed by nvcc
 #include <Eigen/Dense>
 
 // struct Foo{
@@ -121,7 +119,7 @@ struct diagonal {
 };
 
 template<typename T>
-struct eigenvalues {
+struct eigenvalues_direct {
   EIGEN_DEVICE_FUNC
   void operator()(int i, const typename T::Scalar* in, typename T::Scalar* out) const
   {
@@ -136,37 +134,79 @@ struct eigenvalues {
   }
 };
 
-void test_hip_basic()
+template<typename T>
+struct eigenvalues {
+  EIGEN_DEVICE_FUNC
+  void operator()(int i, const typename T::Scalar* in, typename T::Scalar* out) const
+  {
+    using namespace Eigen;
+    typedef Matrix<typename T::Scalar, T::RowsAtCompileTime, 1> Vec;
+    T M(in+i);
+    Map<Vec> res(out+i*Vec::MaxSizeAtCompileTime);
+    T A = M*M.adjoint();
+    SelfAdjointEigenSolver<T> eig;
+    eig.compute(M);
+    res = eig.eigenvalues();
+  }
+};
+
+template<typename T>
+struct matrix_inverse {
+  EIGEN_DEVICE_FUNC
+  void operator()(int i, const typename T::Scalar* in, typename T::Scalar* out) const
+  {
+    using namespace Eigen;
+    T M(in+i);
+    Map<T> res(out+i*T::MaxSizeAtCompileTime);
+    res = M.inverse();
+  }
+};
+
+void test_gpu_basic()
 {
-  ei_test_init_hip();
+  ei_test_init_gpu();
   
   int nthreads = 100;
   Eigen::VectorXf in, out;
   
-  #ifndef __HIP_DEVICE_COMPILE__ 
+  #if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
   int data_size = nthreads * 512;
   in.setRandom(data_size);
   out.setRandom(data_size);
   #endif
   
-  CALL_SUBTEST( run_and_compare_to_hip(coeff_wise<Vector3f>(), nthreads, in, out) );
-  CALL_SUBTEST( run_and_compare_to_hip(coeff_wise<Array44f>(), nthreads, in, out) );
+  CALL_SUBTEST( run_and_compare_to_gpu(coeff_wise<Vector3f>(), nthreads, in, out) );
+  CALL_SUBTEST( run_and_compare_to_gpu(coeff_wise<Array44f>(), nthreads, in, out) );
 
-  // FIXME compile fails when we uncomment the followig two tests
-  // CALL_SUBTEST( run_and_compare_to_hip(replicate<Array4f>(), nthreads, in, out) );
-  // CALL_SUBTEST( run_and_compare_to_hip(replicate<Array33f>(), nthreads, in, out) );
+#if !defined(EIGEN_USE_HIP)
+  // FIXME
+  // These subtests result in a compile failure on the HIP platform
+  //
+  //  eigen-upstream/Eigen/src/Core/Replicate.h:61:65: error:
+  //           base class 'internal::dense_xpr_base<Replicate<Array<float, 4, 1, 0, 4, 1>, -1, -1> >::type'
+  //           (aka 'ArrayBase<Eigen::Replicate<Eigen::Array<float, 4, 1, 0, 4, 1>, -1, -1> >') has protected default constructor
+  CALL_SUBTEST( run_and_compare_to_gpu(replicate<Array4f>(), nthreads, in, out) );
+  CALL_SUBTEST( run_and_compare_to_gpu(replicate<Array33f>(), nthreads, in, out) );
+#endif
   
-  CALL_SUBTEST( run_and_compare_to_hip(redux<Array4f>(), nthreads, in, out) );
-  CALL_SUBTEST( run_and_compare_to_hip(redux<Matrix3f>(), nthreads, in, out) );
+  CALL_SUBTEST( run_and_compare_to_gpu(redux<Array4f>(), nthreads, in, out) );
+  CALL_SUBTEST( run_and_compare_to_gpu(redux<Matrix3f>(), nthreads, in, out) );
   
-  CALL_SUBTEST( run_and_compare_to_hip(prod_test<Matrix3f,Matrix3f>(), nthreads, in, out) );
-  CALL_SUBTEST( run_and_compare_to_hip(prod_test<Matrix4f,Vector4f>(), nthreads, in, out) );
+  CALL_SUBTEST( run_and_compare_to_gpu(prod_test<Matrix3f,Matrix3f>(), nthreads, in, out) );
+  CALL_SUBTEST( run_and_compare_to_gpu(prod_test<Matrix4f,Vector4f>(), nthreads, in, out) );
   
-  CALL_SUBTEST( run_and_compare_to_hip(diagonal<Matrix3f,Vector3f>(), nthreads, in, out) );
-  CALL_SUBTEST( run_and_compare_to_hip(diagonal<Matrix4f,Vector4f>(), nthreads, in, out) );
+  CALL_SUBTEST( run_and_compare_to_gpu(diagonal<Matrix3f,Vector3f>(), nthreads, in, out) );
+  CALL_SUBTEST( run_and_compare_to_gpu(diagonal<Matrix4f,Vector4f>(), nthreads, in, out) );
 
-  // FIXME : Runtime failure occurs when we uncomment the following two tests
-  // CALL_SUBTEST( run_and_compare_to_hip(eigenvalues<Matrix3f>(), nthreads, in, out) );
-  // CALL_SUBTEST( run_and_compare_to_hip(eigenvalues<Matrix2f>(), nthreads, in, out) );
-
+  CALL_SUBTEST( run_and_compare_to_gpu(matrix_inverse<Matrix2f>(), nthreads, in, out) );
+  CALL_SUBTEST( run_and_compare_to_gpu(matrix_inverse<Matrix3f>(), nthreads, in, out) );
+  CALL_SUBTEST( run_and_compare_to_gpu(matrix_inverse<Matrix4f>(), nthreads, in, out) );
+  
+#if !defined(EIGEN_USE_HIP)
+  // FIXME
+  // These subtests result in a linking error on the HIP platform
+  CALL_SUBTEST( run_and_compare_to_gpu(eigenvalues_direct<Matrix3f>(), nthreads, in, out) );
+  CALL_SUBTEST( run_and_compare_to_gpu(eigenvalues_direct<Matrix2f>(), nthreads, in, out) );
+  CALL_SUBTEST( run_and_compare_to_gpu(eigenvalues<Matrix4f>(), nthreads, in, out) );
+#endif
 }

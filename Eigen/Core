@@ -357,7 +357,7 @@
 #endif
 
 #if defined EIGEN_CUDACC
-  #define EIGEN_VECTORIZE_CUDA
+  #define EIGEN_VECTORIZE_GPU
   #include <vector_types.h>
   #if EIGEN_CUDACC_VER >= 70500
     #define EIGEN_HAS_CUDA_FP16
@@ -370,14 +370,20 @@
 #endif
 
 #if defined(EIGEN_HIPCC) && defined(EIGEN_HIP_DEVICE_COMPILE)
+
+  #define EIGEN_VECTORIZE_GPU
+  #include <hip/hip_vector_types.h>
+
   #define EIGEN_HAS_HIP_FP16
   #include <hip/hip_fp16.h>
+
   #define HIP_PATCH_WITH_NEW_FP16 18215
   #if (HIP_VERSION_PATCH < HIP_PATCH_WITH_NEW_FP16)
     #define EIGEN_HAS_OLD_HIP_FP16
     // Old HIP implementation does not have a explicit typedef for "half2"
     typedef __half2 half2;
   #endif
+  
 #endif
 
 #if defined(EIGEN_HAS_CUDA_FP16) || defined(EIGEN_HAS_HIP_FP16)
@@ -551,9 +557,9 @@ using std::ptrdiff_t;
 #include "src/Core/arch/GPU/PacketMathHalf.h"
 #include "src/Core/arch/GPU/TypeCasting.h"
 
-#if defined EIGEN_VECTORIZE_CUDA
-  #include "src/Core/arch/CUDA/PacketMath.h"
-  #include "src/Core/arch/CUDA/MathFunctions.h"
+#if defined EIGEN_VECTORIZE_GPU
+  #include "src/Core/arch/GPU/PacketMath.h"
+  #include "src/Core/arch/GPU/MathFunctions.h"
 #endif
 
 #include "src/Core/arch/Default/Settings.h"
