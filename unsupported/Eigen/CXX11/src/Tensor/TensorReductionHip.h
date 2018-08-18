@@ -17,7 +17,7 @@
 
 #ifdef __NVCC__
 #define HIP_WARP_SIZE 32
-#elif defined(__HCC__)
+#elif defined(__HIPCC__)
 #define HIP_WARP_SIZE 64
 #endif
 

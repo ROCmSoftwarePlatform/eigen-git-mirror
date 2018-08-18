@@ -4,7 +4,7 @@
 #ifndef INTRINSICS_H
 #define INTRINSICS_H
 
-#ifdef __HCC__        // For HC backend
+#ifdef __HIPCC__        // For HC backend
     #define WARP_SIZE 64
 #else                  // For NVCC backend
     #define WARP_SIZE 32
@@ -157,7 +157,7 @@ __HIP_FP16_DECL_PREFIX__ inline unsigned long long __hip_umul64hi(unsigned long 
 /*------------------DUMMY SUPPORT FOR UNSUPPORTED INTRINSICS------------------*/
 
 //TODO: Replace them once supported by HC
-#ifdef __HCC__        // For HC backend
+#ifdef __HIPCC__        // For HC backend
     #define __hip_threadfence() hc_barrier(CLK_LOCAL_MEM_FENCE)
     #define __hip_threadfence_block() hc_barrier(CLK_LOCAL_MEM_FENCE)
 

@@ -449,7 +449,7 @@ struct round_retval
   struct arg_impl {
     static inline Scalar run(const Scalar& x)
     {
-      #ifdef __HCC__
+      #ifdef __HIPCC__
       using std::arg;
       #else
       EIGEN_USING_STD_MATH(arg);

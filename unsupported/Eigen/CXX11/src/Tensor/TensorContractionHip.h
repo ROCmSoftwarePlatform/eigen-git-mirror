@@ -1515,7 +1515,7 @@ struct TensorEvaluator<const TensorContractionOp<Indices, LeftArgType, RightArgT
 
 #ifdef __NVCC__
     //TODO:setCudaSharedMemConfig(CudaSharedMemBankSizeEightByte);
-#elif __HCC__
+#elif __HIPCC__
     setHipSharedMemConfig(hipSharedMemBankSizeEightByte);
 #endif
     LaunchKernels<LhsScalar, RhsScalar, Index, LhsMapper, RhsMapper, OutputMapper>::Run(lhs, rhs, output,  m, n, k, this->m_device);
