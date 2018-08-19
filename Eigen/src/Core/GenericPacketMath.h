@@ -211,19 +211,19 @@ template<typename Packet> EIGEN_DEVICE_FUNC inline Packet
 pandnot(const Packet& a, const Packet& b) { return a & (!b); }
 
 /** \internal \returns a packet version of \a *from, from must be 16 bytes aligned */
-template<typename Packet> EIGEN_DEVICE_FUNC inline Packet
+template<typename Packet> EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE Packet
 pload(const typename unpacket_traits<Packet>::type* from) { return *from; }
 
 /** \internal \returns a packet version of \a *from, (un-aligned load) */
-template<typename Packet> EIGEN_DEVICE_FUNC inline Packet
+template<typename Packet> EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE Packet
 ploadu(const typename unpacket_traits<Packet>::type* from) { return *from; }
 
 /** \internal \returns a packet with constant coefficients \a a, e.g.: (a,a,a,a) */
-template<typename Packet> EIGEN_DEVICE_FUNC inline Packet
+template<typename Packet> EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE Packet
 pset1(const typename unpacket_traits<Packet>::type& a) { return a; }
 
 /** \internal \returns a packet with constant coefficients \a a[0], e.g.: (a[0],a[0],a[0],a[0]) */
-template<typename Packet> EIGEN_DEVICE_FUNC inline Packet
+template<typename Packet> EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE Packet
 pload1(const typename unpacket_traits<Packet>::type  *a) { return pset1<Packet>(*a); }
 
 /** \internal \returns a packet with elements of \a *from duplicated.
@@ -528,10 +528,10 @@ inline void palign(PacketType& first, const PacketType& second)
 // Eigen+CUDA does not support complexes.
 #ifndef EIGEN_CUDACC
 
-template<> inline std::complex<float> pmul(const std::complex<float>& a, const std::complex<float>& b)
+template<> EIGEN_DEVICE_FUNC inline std::complex<float> pmul(const std::complex<float>& a, const std::complex<float>& b)
 { return std::complex<float>(real(a)*real(b) - imag(a)*imag(b), imag(a)*real(b) + real(a)*imag(b)); }
 
-template<> inline std::complex<double> pmul(const std::complex<double>& a, const std::complex<double>& b)
+template<> EIGEN_DEVICE_FUNC inline std::complex<double> pmul(const std::complex<double>& a, const std::complex<double>& b)
 { return std::complex<double>(real(a)*real(b) - imag(a)*imag(b), imag(a)*real(b) + real(a)*imag(b)); }
 
 #endif
@@ -596,3 +596,4 @@ pinsertlast(const Packet& a, typename unpacket_traits<Packet>::type b)
 } // end namespace Eigen
 
 #endif // EIGEN_GENERIC_PACKET_MATH_H
+

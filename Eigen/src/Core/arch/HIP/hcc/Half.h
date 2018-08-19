@@ -75,7 +75,7 @@ struct __half_raw {
     unsigned short x;
     __half data;
   };
-  operator __half(void) const { return data; }
+  EIGEN_DEVICE_FUNC operator __half(void) const { return data; }
 };
 #endif
 
@@ -176,7 +176,7 @@ namespace half_impl {
 // versions to get the ALU speed increased), but you do save the
 // conversion steps back and forth.
 
-EIGEN_STRONG_INLINE __device__ half operator + (const half& a, const half& b) {
+EIGEN_STRONG_INLINE __device__ __host__ half operator + (const half& a, const half& b) {
   return __hadd(a, b);
 }
 EIGEN_STRONG_INLINE __device__ half operator * (const half& a, const half& b) {
@@ -515,11 +515,11 @@ namespace internal {
 template<>
 struct random_default_impl<half, false, false>
 {
-  static inline half run(const half& x, const half& y)
+  static EIGEN_DEVICE_FUNC inline half run(const half& x, const half& y)
   {
     return x + (y-x) * half(float(std::rand()) / float(RAND_MAX));
   }
-  static inline half run()
+  static EIGEN_DEVICE_FUNC inline half run()
   {
     return run(half(-1.f), half(1.f));
   }
@@ -658,7 +658,7 @@ __device__ EIGEN_STRONG_INLINE Eigen::half __shfl_xor(Eigen::half var, int laneM
 #if defined(__HIP_DEVICE_COMPILE__)
 EIGEN_STRONG_INLINE EIGEN_DEVICE_FUNC Eigen::half __ldg(const Eigen::half* ptr) {
   return Eigen::half_impl::raw_uint16_to_half(
-      __ldg(reinterpret_cast<const unsigned short*>(ptr)));
+      __ldg(reinterpret_cast<const __half*>(ptr)));
 }
 #endif
 
