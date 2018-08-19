@@ -11,6 +11,8 @@
 #ifndef EIGEN_CXX11_TENSOR_TENSOR_REDUCTION_HIP_H
 #define EIGEN_CXX11_TENSOR_TENSOR_REDUCTION_HIP_H
 
+#include <mutex>
+
 #ifdef __HIP_DEVICE_COMPILE__
 #include "Eigen/src/Core/arch/HIP/hcc/intrinsics.h"
 #endif
