@@ -109,7 +109,7 @@ template<> __device__ EIGEN_STRONG_INLINE half2 pabs<half2>(const half2& a) {
 }
 
 
-__device__ EIGEN_STRONG_INLINE void
+EIGEN_DEVICE_FUNC inline void
 ptranspose(PacketBlock<half2,2>& kernel) {
   __half a1 = __low2half(kernel.packet[0]);
   __half a2 = __high2half(kernel.packet[0]);
@@ -153,7 +153,7 @@ template<> __device__ EIGEN_STRONG_INLINE half2 pdiv<half2>(const half2& a, cons
 #endif
 }
 
-template<> __device__ EIGEN_STRONG_INLINE half2 pmin<half2>(const half2& a, const half2& b) {
+template<> EIGEN_DEVICE_FUNC inline half2 pmin<half2>(const half2& a, const half2& b) {
   float a1 = __low2float(a);
   float a2 = __high2float(a);
   float b1 = __low2float(b);
@@ -163,7 +163,7 @@ template<> __device__ EIGEN_STRONG_INLINE half2 pmin<half2>(const half2& a, cons
   return __halves2half2(r1, r2);
 }
 
-template<> __device__ EIGEN_STRONG_INLINE half2 pmax<half2>(const half2& a, const half2& b) {
+template<> EIGEN_DEVICE_FUNC inline half2 pmax<half2>(const half2& a, const half2& b) {
   float a1 = __low2float(a);
   float a2 = __high2float(a);
   float b1 = __low2float(b);
@@ -173,27 +173,27 @@ template<> __device__ EIGEN_STRONG_INLINE half2 pmax<half2>(const half2& a, cons
   return __halves2half2(r1, r2);
 }
 
-template<> __device__ EIGEN_STRONG_INLINE Eigen::half predux<half2>(const half2& a) {
+template<> EIGEN_DEVICE_FUNC inline Eigen::half predux<half2>(const half2& a) {
   return __hadd(__low2half(a), __high2half(a));
 }
 
-template<> __device__ EIGEN_STRONG_INLINE Eigen::half predux_max<half2>(const half2& a) {
+template<> EIGEN_DEVICE_FUNC inline Eigen::half predux_max<half2>(const half2& a) {
   __half first = __low2half(a);
   __half second = __high2half(a);
   return __hgt(first, second) ? first : second;
 }
 
-template<> __device__ EIGEN_STRONG_INLINE Eigen::half predux_min<half2>(const half2& a) {
+template<> EIGEN_DEVICE_FUNC inline Eigen::half predux_min<half2>(const half2& a) {
   __half first = __low2half(a);
   __half second = __high2half(a);
   return __hlt(first, second) ? first : second;
 }
 
-template<> __device__ EIGEN_STRONG_INLINE Eigen::half predux_mul<half2>(const half2& a) {
+template<> EIGEN_DEVICE_FUNC inline Eigen::half predux_mul<half2>(const half2& a) {
   return __hmul(__low2half(a), __high2half(a));
 }
 
-template<> __device__ EIGEN_STRONG_INLINE half2 plog1p<half2>(const half2& a) {
+template<> EIGEN_DEVICE_FUNC inline half2 plog1p<half2>(const half2& a) {
   float a1 = __low2float(a);
   float a2 = __high2float(a);
   float r1 = log1pf(a1);
@@ -201,7 +201,7 @@ template<> __device__ EIGEN_STRONG_INLINE half2 plog1p<half2>(const half2& a) {
   return __floats2half2_rn(r1, r2);
 }
 
-template<> __device__ EIGEN_STRONG_INLINE half2 pexpm1<half2>(const half2& a) {
+template<> EIGEN_DEVICE_FUNC inline half2 pexpm1<half2>(const half2& a) {
   float a1 = __low2float(a);
   float a2 = __high2float(a);
   float r1 = expm1f(a1);
@@ -209,22 +209,22 @@ template<> __device__ EIGEN_STRONG_INLINE half2 pexpm1<half2>(const half2& a) {
   return __floats2half2_rn(r1, r2);
 }
 
-template<>  __device__ EIGEN_STRONG_INLINE
+template<>  EIGEN_DEVICE_FUNC inline
 half2 plog<half2>(const half2& a) {
   return h2log(a);
 }
 
-template<> __device__ EIGEN_STRONG_INLINE
+template<> EIGEN_DEVICE_FUNC inline
 half2 pexp<half2>(const half2& a) {
   return h2exp(a);
 }
 
-template<> __device__ EIGEN_STRONG_INLINE
+template<> EIGEN_DEVICE_FUNC inline
 half2 psqrt<half2>(const half2& a) {
   return h2sqrt(a);
 }
 
-template<> __device__ EIGEN_STRONG_INLINE
+template<> EIGEN_DEVICE_FUNC inline
 half2 prsqrt<half2>(const half2& a) {
   return h2rsqrt(a);
 }
