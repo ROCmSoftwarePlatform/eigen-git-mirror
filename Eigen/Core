@@ -64,9 +64,10 @@
     #endif
 
     #define EIGEN_DEVICE_FUNC __host__ __device__
-    // We need math_functions.h to ensure that that EIGEN_USING_STD_MATH macro
-    // works properly on the device side
-    #include <hip/math_functions.h>
+    // We need hip_runtime.h to ensure that that EIGEN_USING_STD_MATH macro
+    // works properly on the device side and to support std::complex for
+    // hip-clang.
+    #include <hip/hip_runtime.h>
   #else
     #define EIGEN_DEVICE_FUNC
   #endif
