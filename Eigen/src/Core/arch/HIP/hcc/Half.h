@@ -233,18 +233,18 @@ namespace half_impl {
 EIGEN_STRONG_INLINE __device__ __host__ half operator + (const half& a, const half& b) {
   return __hadd(a, b);
 }
-EIGEN_STRONG_INLINE __device__ half operator * (const half& a, const half& b) {
+EIGEN_STRONG_INLINE __device__ __host__ half operator * (const half& a, const half& b) {
   return __hmul(a, b);
 }
-EIGEN_STRONG_INLINE __device__ half operator - (const half& a, const half& b) {
+EIGEN_STRONG_INLINE __device__ __host__ half operator - (const half& a, const half& b) {
   return __hsub(a, b);
 }
-EIGEN_STRONG_INLINE __device__ half operator / (const half& a, const half& b) {
+EIGEN_STRONG_INLINE __device__ __host__ half operator / (const half& a, const half& b) {
   float num = __half2float(a);
   float denom = __half2float(b);
   return __float2half(num / denom);
 }
-EIGEN_STRONG_INLINE __device__ half operator - (const half& a) {
+EIGEN_STRONG_INLINE __device__ __host__ half operator - (const half& a) {
   return __hneg(a);
 }
 EIGEN_STRONG_INLINE __device__ half& operator += (half& a, const half& b) {
